@@ -42,6 +42,7 @@ class Sourcemeter2400(object):
                 self.__dev.write(':source:current:level {0}'.format(current))
 
         def read(self):
-                return self.__dev.ask(':read?')
+                voltage, current = self.__dev.ask(':read?').split(',')
+                return float(voltage), float(current)
 
 
