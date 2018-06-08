@@ -22,6 +22,7 @@ class Sourcemeter2602A(object):
         self._dev.write("{}.source.limiti = {}".format(self._channel_string, current_limit))
         self._dev.write("{}.measure.autorangei = smua.AUTORANGE_ON".format(self._channel_string))
         self._dev.write("{}.measure.nplc = {}".format(self._channel_string, nplc))
+        self._dev.write("{}.measure.lowrangei = 1e-8".format(self._channel_string))
 
     def current_driven(self, current, voltage_limit=1):
         raise NotImplementedError('you fool!')
