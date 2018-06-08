@@ -44,7 +44,7 @@ class Sourcemeter2602A(object):
         return self._dev.query_ascii_values("printnumber(vreading{0},ireading{0})".format(self._channel_token))
 
     def __str__(self):
-        return 'Sourcemeter 2636A {} {}'.format(self._channel, self._dev.resource_name)
+        return 'Sourcemeter 2602A {} {}'.format(self._channel, self._dev.resource_name)
 
 
 if __name__ == '__main__':
