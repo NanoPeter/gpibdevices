@@ -43,7 +43,7 @@ class Sourcemeter2400(object):
 
         def read(self):
                 voltage, current = self._dev.query_ascii_values(':read?')
-                return float(voltage), float(current)
+                return voltage, current
 
 
 
