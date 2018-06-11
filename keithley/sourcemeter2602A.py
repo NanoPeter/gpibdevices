@@ -14,7 +14,7 @@ class Sourcemeter2602A(object):
         self._channel = sub_device
         self._dev.write('smua.reset()')
 
-    def voltage_driven(self, voltage, current_limit=1e-6, nplc = 3):
+    def voltage_driven(self, voltage, current_limit=1e-6, nplc = 3, range=1e-8):
         self._dev.write('{}.reset()'.format(self._channel_string))
         self._dev.write("{}.source.func = smua.OUTPUT_DCVOLTS".format(self._channel_string))
         self._dev.write("{}.source.levelv = 0.0".format(self._channel_string))
@@ -22,7 +22,7 @@ class Sourcemeter2602A(object):
         self._dev.write("{}.source.limiti = {}".format(self._channel_string, current_limit))
         self._dev.write("{}.measure.autorangei = smua.AUTORANGE_ON".format(self._channel_string))
         self._dev.write("{}.measure.nplc = {}".format(self._channel_string, nplc))
-        self._dev.write("{}.measure.lowrangei = 1e-8".format(self._channel_string))
+        self._dev.write("{}.measure.lowrangei = {}".format(self._channel_string, range))
 
     def current_driven(self, current, voltage_limit=1):
         raise NotImplementedError('you fool!')
