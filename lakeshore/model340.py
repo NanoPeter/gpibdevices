@@ -36,7 +36,7 @@ class Model340:
     def get_set_point(self, loop:Loop=Loop.ONE):
         return float(self._query('SETP? {}'.format(loop.value)))
         
-    def set_set_point(self, loop:Loop, temperature):
+    def set_set_point(self, temperature, loop:Loop=Loop.ONE):
         return self._write('SETP {loop}, {temperature}'.format(loop=loop.value,
                                                               temperature=temperature))
         
@@ -49,7 +49,7 @@ class Model340:
         
         return {'enabled': bool(split[0]), 'rate': float(split[1])}
         
-    def set_ramp(self, loop:Loop, enable: bool, rate: float):
+    def set_ramp(self, enable: bool, rate: float, loop:Loop=Loop.ONE):
             
         self._write('RAMP {loop}, {enable}, {rate}'.format(loop=loop.value,
                                                             enable=int(enable),
