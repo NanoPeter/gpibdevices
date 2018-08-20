@@ -59,6 +59,22 @@ class FlowController(object):
 
         return FlowControllerResult(raw_message)
 
+    def read_register(self, number):
+        message = '{0}$$R{1}\r'.format(self.unit_id, number).encode()
+        self.connection.write(message)
+        raw_message = self.connection.readline()
+
+        return raw_message
+
+    def write_register(self, number, value):
+        assert 21 <= number <= 22, 'value not allowed'
+
+        message = '{0}$$W{1}={2}\r'.format(self.unit_id, number, value).encode()
+        self.connection.write(message)
+        raw_message = self.connection.readline()
+
+        return raw_message
+
     def off(self):
         return self.set(0.0)
 
