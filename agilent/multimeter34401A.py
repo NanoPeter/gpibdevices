@@ -7,6 +7,15 @@ class Multimeter34401A(object):
         self.dev.read_termination = "\n"
         self.dev.write('*RST')
 
+        self._method = self.two_wire
+
+    def set_four_wire(self):
+        self._method = self.four_wire
+
+    def set_two_wire(self):
+        self._method = self.two_wire
+
+
     def four_wire(self):
         #here MEAS:FRES? RANGE, RESOLTION
         # MEAS:FRES? 10000, 0.1
@@ -17,6 +26,9 @@ class Multimeter34401A(object):
     def two_wire(self):
         self.dev.write('MEAS:RES? 10000, 0.1')
 
+    @property
+    def resistance(self):
+        return self._method()
 
 
 if __name__=='__main__':
