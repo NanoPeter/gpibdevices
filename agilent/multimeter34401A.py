@@ -21,10 +21,10 @@ class Multimeter34401A(object):
         # MEAS:FRES? 10000, 0.1
         # meaning: measure resistance in four-wiremode 
         # in the range of 10kOhm with an accuracy of 0.1 Ohm
-        self.dev.write('MEAS:FRES? 10000, 0.1')
+        return self.dev.write('MEAS:FRES? 10000, 0.1')
 
     def two_wire(self):
-        self.dev.write('MEAS:RES? 10000, 0.1')
+        return self.dev.write('MEAS:RES? 10000, 0.1')
 
     @property
     def resistance(self) -> float:
