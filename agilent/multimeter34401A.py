@@ -27,8 +27,8 @@ class Multimeter34401A(object):
         self.dev.write('MEAS:RES? 10000, 0.1')
 
     @property
-    def resistance(self):
-        return self._method()
+    def resistance(self) -> float:
+        return float(self._method())
 
 
 if __name__=='__main__':
