@@ -15,7 +15,7 @@ class MicroPressureSensor:
     P0 = 7.77571e-3
     D = 1.0 / 1.21503756
 
-    def __init__(self, serial_path -> str):
+    def __init__(self, serial_path: str):
         self._serial = Serial(serial_path,
                               baudrate = MicroPressureSensor.BAUD_RATE,
                               timeout = MicroPressureSensor.TIMEOUT,
@@ -32,7 +32,7 @@ class MicroPressureSensor:
         self._upper_bound = MicroPressureSensor.MAX_VALUE #highest possible value
 
     def _calculate_pressure(self, value: int) -> float:
-        if value > C:
+        if value > self._lower_bound:
             radicand = self._upper_bound / (value - self._lower_bound) - 1.0
             if radicand < 0:
                 return float('-inf')
@@ -42,8 +42,8 @@ class MicroPressureSensor:
             return float('inf')
 
     def _get_raw_value(self):
-        s.write(MicroPressureSensor.MESSAGE)
-        answer = s.readline()
+        self._serial.write(MicroPressureSensor.MESSAGE)
+        answer = self._serial.readline()
         text = answer.decode('utf-8')
 
         if len(text) > 0:
@@ -60,17 +60,17 @@ class MicroPressureSensor:
         except IOError:
             return float('nan'), -1
         else:
-            return self._calculate_pressure(value), value
+            return value
 
     def calibrate_lower_bound(self):
         try:
-            self._lower_bound = self.get_raw_value()
+            _, self._lower_bound = self._get_raw_value()
         except IOError:
             self._lower_bound = MicroPressureSensor.MIN_VALUE
 
     def calibrate_upper_bound(self):
         try:
-            self._upper_bound = self.get_raw_value()
+            _, self._upper_bound = self._get_raw_value()
         except IOError:
             self._upper_bound = MicroPressureSensor.MAX_VALUE
 

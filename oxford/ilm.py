@@ -52,4 +52,4 @@ if __name__ == '__main__':
     DEVICE = visa.instrument('GPIB::24')
     ILM_CONNECTION = ILM(DEVICE)
 
-    print ILM_CONNECTION.get_level(), '%'
+    print(ILM_CONNECTION.get_level(), '%')

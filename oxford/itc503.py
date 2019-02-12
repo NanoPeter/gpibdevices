@@ -89,10 +89,10 @@ class ITC(object):
             raise ScriptSyntaxError("The temperature must be a float!")
         if temperature < 0:
             temperature = 0
-            print "Temperature too low, set to 0K."
+            print("Temperature too low, set to 0K.")
         if temperature > 299:
             temperature = 299
-            print "Temperature too high, set to 299K."
+            print("Temperature too high, set to 299K.")
 
         # Communication with the instrument
         self.clear() # Clears the GPIB Bus to prevent problems in communication.
@@ -141,30 +141,30 @@ class ITC(object):
             raise ScriptSyntaxError("The proportional value must be a float!")
         if proportional < 0:
             proportional = 0
-            print "Proportional value too low, set to 0."
+            print("Proportional value too low, set to 0.")
         if proportional > 300:
             proportional = 300
-            print "Proportional value too high, set to 300K."
+            print("Proportional value too high, set to 300K.")
         try:
             integral = float(integral)
         except:
             raise ScriptSyntaxError("The integral value entered must be a float")
         if integral < 0:
             integral = 0
-            print "The integral value entered is too low, set to 0 min."
+            print("The integral value entered is too low, set to 0 min.")
         if integral > 140.0:
             integral = 140.0 # Set integral time to maximum value 140.0 min.
-            print "The  integral value entered is too high, set to 140 min."
+            print("The  integral value entered is too high, set to 140 min.")
         try:
             derivative = float(derivative)
         except:
             raise ScriptSyntaxError("The derivative value entered must be a float")
         if derivative < 0:
             derivative = 0
-            print "The derivative value entered is too low, set to 0 min."
+            print("The derivative value entered is too low, set to 0 min.")
         if derivative > 273.0:
             derivative = 273.0 # Set derivatie value to maximum value 273 min.
-            print "The derivative value entered is too high, set to 273 min."
+            print("The derivative value entered is too high, set to 273 min.")
 
 
         # Communication with the instrument 
@@ -211,10 +211,10 @@ class ITC(object):
             raise ScriptSyntaxError("The Heater Output value must be a float")
         if heater_output < 0:
             heater_output = 0
-            print "Heater Output value too low, set to 0%."
+            print("Heater Output value too low, set to 0%.")
         if heater_output > 100:
             heater_output = 100
-            print "Heater Output value too high, set to 100%."
+            print("Heater Output value too high, set to 100%.")
 
 
         # Communication with the instrument
@@ -255,10 +255,10 @@ class ITC(object):
             raise ScriptSyntaxError("The Gas-Flow value must be a float")
         if gas_flow < 0:
             gas_flow = 0
-            print "Gas-Flow value too low, set to 0%."
+            print("Gas-Flow value too low, set to 0%.")
         if gas_flow > 100:
             gas_flow = 100
-            print "Gas-Flow value too high, set to 100%."
+            print("Gas-Flow value too high, set to 100%.")
 
 
         # Communication with the instrument
@@ -286,16 +286,17 @@ class ITC(object):
         """
 
         # Communication with the instrument
-        heater_output_percentage, heater_output_volts = self.heater_output()
-        gas_flow = self.gas_flow()  
-        temperature_set_point = self.temperature_set_point()
-        pid_proportional, pid_integral, pid_derivative = self.pid_parameters()
+        heater_output_percentage, heater_output_volts = self.heater_output
+        gas_flow = self.gas_flow 
+        temperature_set_point = self.temperature_set_point
+        pid_proportional, pid_integral, pid_derivative = self.pid_parameters
         self.clear() # Clears the GPIB Bus to prevent problems in communication.pyth
-        status = self.itc.ask("@0X")    # stop existing sweep
+        self.clear() # Clears the GPIB Bus to prevent problems in communication.pyth
+        status = str(self.itc.ask("@0X")).replace('b', '').replace("'", "")
+        #print(status)
 
         # Device output Sequence:   XnAnCnSnnHn L n
         #                           0123456789101112
-
 
         # Examine Heater and Gas-Flow settings
         if int(status[3]) == 0:
@@ -343,6 +344,8 @@ class ITC(object):
             heater_sensor_used = 2
         elif int(status[10]) == 3:
             heater_sensor_used = 3
+        else:
+            heater_sensor_used = 0
 
         # Examine Auto-PID Status
         if int(status[12]) == 0:
@@ -414,30 +417,30 @@ class ITC(object):
             raise ScriptSyntaxError("The temperature must be a float!")
         if temperature < 0:
             temperature = 0
-            print "Temperature too low, set to 0K."
+            print("Temperature too low, set to 0K.")
         if temperature > 299:
             temperature = 299
-            print "Temperature too high, set to 299K."
+            print("Temperature too high, set to 299K.")
         try:
             sweep_time = float(sweep_time)
         except:
             raise ScriptSyntaxError("The sweep time entered must be a float")
         if sweep_time < 0:
             sweep_time = 0
-            print "The sweep time entered is too low, set to 0 min."
+            print("The sweep time entered is too low, set to 0 min.")
         if sweep_time > 1399:
             sweep_time = 1399 # Set sweep time to maximum value.
-            print "The sweep time entered is too high, set to 1399 min."
+            print("The sweep time entered is too high, set to 1399 min.")
         try:
             hold_time = float(hold_time)
         except:
             raise ScriptSyntaxError("The hold time entered must be a float")
         if hold_time < 0:
             hold_time = 0
-            print "The hold time entered is too low, set to 0 min."
+            print("The hold time entered is too low, set to 0 min.")
         if hold_time > 1399:
             hold_time = 1399 # Set hold time to maximum value.
-            print "The hold time entered is too high, set to 1399 min."
+            print("The hold time entered is too high, set to 1399 min.")
 
         # Communication with the insrument
         self.clear() # Clears the GPIB Bus to prevent problems in communication.
@@ -635,9 +638,9 @@ if __name__ == '__main__':
     DEVICE = visa.instrument('GPIB::24')
     ITC_CONNECTION = ITC(DEVICE)
 
-    print ITC_CONNECTION.T1, 'K'
-    print ITC_CONNECTION.T2, 'K'
-    print ITC_CONNECTION.T3, 'K'
+    print(ITC_CONNECTION.T1, 'K')
+    print(ITC_CONNECTION.T2, 'K')
+    print(ITC_CONNECTION.T3, 'K')
     
     #ITC_CONNECTION.set_pid_parameters(5.0, 2.7, 0)
     #print ITC_CONNECTION.get_device_status()

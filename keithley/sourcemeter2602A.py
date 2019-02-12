@@ -15,7 +15,8 @@ class Sourcemeter2602A(object):
         self._dev.write('{0}.reset()'.format(self._channel_string))
 
     def voltage_driven(self, voltage, current_limit=1e-6, nplc = 3, range=1e-8):
-        self._dev.write('{}.reset()'.format(self._channel_string))
+        #self._dev.write('{}.reset()'.format(self._channel_string))
+        self._dev.write('{0}.source.offmode = {0}.OUTPUT_HIGH_Z'.format(self._channel_string))
         self._dev.write("{0}.source.func = {0}.OUTPUT_DCVOLTS".format(self._channel_string))
         self._dev.write("{}.source.levelv = 0.0".format(self._channel_string))
         self._dev.write("{0}.source.autorangev = {0}.AUTORANGE_ON".format(self._channel_string))
@@ -24,8 +25,16 @@ class Sourcemeter2602A(object):
         self._dev.write("{}.measure.nplc = {}".format(self._channel_string, nplc))
         self._dev.write("{}.measure.lowrangei = {}".format(self._channel_string, range))
 
-    def current_driven(self, current, voltage_limit=1):
-        raise NotImplementedError('you fool!')
+    def current_driven(self, current, voltage_limit=1, nplc = 3, range=1e-8):
+        #self._dev.write('{}.reset()'.format(self._channel_string))
+        self._dev.write('{0}.source.offmode = {0}.OUTPUT_HIGH_Z'.format(self._channel_string))
+        self._dev.write("{0}.source.func = {0}.OUTPUT_DCAMPS".format(self._channel_string))
+        self._dev.write("{}.source.leveli = {}".format(self._channel_string, current))
+        self._dev.write("{0}.source.autorangei = {0}.AUTORANGE_ON".format(self._channel_string))
+        self._dev.write("{}.source.limitv = {}".format(self._channel_string, voltage_limit))
+        self._dev.write("{0}.measure.autorangev = {0}.AUTORANGE_ON".format(self._channel_string))
+        self._dev.write("{}.measure.nplc = {}".format(self._channel_string, nplc))
+        #self._dev.write("{}.measure.lowrangev = {}".format(self._channel_string, range))
 
     def arm(self):
         self._dev.write("{0}.source.output = {0}.OUTPUT_ON".format(self._channel_string))
@@ -37,7 +46,7 @@ class Sourcemeter2602A(object):
         self._dev.write("{}.source.levelv = {}".format(self._channel_string, voltage))
 
     def set_current(self, current):
-        raise NotImplementedError('you fool!')
+        self._dev.write("{}.source.leveli = {}".format(self._channel_string, current))
 
     def read(self):
         self._dev.write("ireading{0}, vreading{0} = {1}.measure.iv()".format(self._channel_token, self._channel_string))
