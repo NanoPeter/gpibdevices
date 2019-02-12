@@ -13,6 +13,7 @@ class FlowControllerResult(object):
         finally:
             if len(split) > 5:
                 self.__init(split)
+                self.error = False
 
     def __init(self, split):
         self.pressure = 70.0 * float(split[1]) #umrechnung von psia in mbar
@@ -27,6 +28,7 @@ class FlowControllerResult(object):
         self.volflow = 0
         self.massflow = 0
         self.setpoint = 0
+        self.error = True
 
     def __repr__(self):
         return 'Pressure: {0}\nTemperature: {1}\nVolume Flow: {2}\nMass Flow: {3}\nSet Point: {4}\n'.format(self.pressure, self.temperature, self.volflow, self.massflow, self.setpoint)
@@ -42,7 +44,7 @@ class FlowController(object):
         self.connection.parity = serial.PARITY_NONE
         self.connection.stopbits = 1
         self.connection.bytesize = 8
-        self.connection.timeout = 0.1
+        self.connection.timeout = 0.5
 
     def poll(self):
         self.connection.write('{0}\r'.format(self.unit_id).encode())
