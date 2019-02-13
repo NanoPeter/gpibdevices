@@ -17,6 +17,7 @@ class MinMaxValue(Enum):
 class Multimeter34401A(object):
     def __init__(self, device):
         self.dev = device
+        self.dev.write('*CLS')
         self.dev.write('*RST')
 
     def set_sense(self, method: SenseMethod,
@@ -39,10 +40,10 @@ class Multimeter34401A(object):
                                 if time >= integration_time_nplc])
 
         self.dev.write('SENS:FUNC "{:s}"'.format(method_string))
-        self.dev.write('SENS:FUNC:{:s}:RANG {:s}'.format(method_string, range_parameter))
-        self.dev.write('SENS:FUNC:{:s}:RANG:AUTO {:s}'.format(method_string, auto_range_parameter))
-        self.dev.write('SENS:FUNC:{:s}:RES {:s}'.format(method_string, resolution_parameter))
-        self.dev.write('SENS:FUNC:{:s}:NPLC {:f}'.format(method_string, integration_time))
+        self.dev.write('SENS:{:s}:RANG {:s}'.format(method_string, range_parameter))
+        self.dev.write('SENS:{:s}:RANG:AUTO {:s}'.format(method_string, auto_range_parameter))
+        self.dev.write('SENS:{:s}:RES {:s}'.format(method_string, resolution_parameter))
+        self.dev.write('SENS:{:s}:NPLC {:f}'.format(method_string, integration_time))
 
     def get_errors(self):
         return self.dev.query('SYST:ERR?')
@@ -68,6 +69,8 @@ if __name__=='__main__':
 
     mux.set_sense(SenseMethod.four_probe_resistance)
 
-    print(dev.read())
+    print(mux.get_errors())
+
+    print(mux.read())
 
 
