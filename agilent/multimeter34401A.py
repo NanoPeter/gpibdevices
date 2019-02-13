@@ -1,34 +1,59 @@
+from enum import Enum
+
+from typing import Union
+
+class SenseMethod(Enum):
+    voltage_dc = 'VOLT:DC'
+    voltage_ac = 'VOLT:AC'
+    current_dc = 'CURR:DC'
+    current_ac = 'CURR:AC'
+    two_probe_resistance = 'RES'
+    four_probe_resistance = 'FRES'
+
+class MinMaxValue(Enum):
+    MIN = 'MIN'
+    MAX = 'MAX'
+
 class Multimeter34401A(object):
-    """With add-in card Agilent 34901A on channel 1."""
-    
     def __init__(self, device):
         self.dev = device
-        self.dev.write_termination = "\n"
-        self.dev.read_termination = "\n"
         self.dev.write('*RST')
 
-        self._method = self.two_wire
+    def set_sense(self, method: SenseMethod,
+            range: Union[float, MinMaxValue] = MinMaxValue.MAX,
+            resolution: Union[float, MinMaxValue] = MinMaxValue.MIN,
+            integration_time_nplc: float = 10,
+            auto_range: bool = False):
+        """ sets all sense settings for a measurement
+            nplc will be set near the following numbers
+            [0.02, 0.2, 1, 10, 100]
+        """
 
-    def set_four_wire(self):
-        self._method = self.four_wire
+        method_string = method.value
 
-    def set_two_wire(self):
-        self._method = self.two_wire
+        resolution_parameter = str(resolution) if type(resolution) is float else resolution.value
+        range_parameter = str(range) if type(range) is float else range.value
+        auto_range_parameter = 'ON' if auto_range else 'OFF'
+
+        integration_time = min([time for time in [0.02, 0.2, 1, 10, 100]
+                                if time >= integration_time_nplc])
+
+        self.dev.write('SENS:FUNC "{:s}"'.format(method_string))
+        self.dev.write('SENS:FUNC:{:s}:RANG {:s}'.format(method_string, range_parameter))
+        self.dev.write('SENS:FUNC:{:s}:RANG:AUTO {:s}'.format(method_string, auto_range_parameter))
+        self.dev.write('SENS:FUNC:{:s}:RES {:s}'.format(method_string, resolution_parameter))
+        self.dev.write('SENS:FUNC:{:s}:NPLC {:f}'.format(method_string, integration_time))
+
+    def get_errors(self):
+        return self.dev.query('SYST:ERR?')
 
 
-    def four_wire(self):
-        #here MEAS:FRES? RANGE, RESOLTION
-        # MEAS:FRES? 10000, 0.1
-        # meaning: measure resistance in four-wiremode 
-        # in the range of 10kOhm with an accuracy of 0.1 Ohm
-        return self.dev.write('MEAS:FRES? 10000, 0.1')
-
-    def two_wire(self):
-        return self.dev.write('MEAS:RES? 10000, 0.1')
+    def read(self):
+        return self.dev.query('READ?')
 
     @property
     def resistance(self) -> float:
-        return float(self._method())
+        return float(self.read())
 
 
 if __name__=='__main__':
@@ -40,7 +65,9 @@ if __name__=='__main__':
     dev = rm.open_resource('GPIB0::9::INSTR')
 
     mux = Multimeter34401A(dev)
-    
-    print(dev.four_wire())
 
-    
+    mux.set_sense(SenseMethod.four_probe_resistance)
+
+    print(dev.read())
+
+
