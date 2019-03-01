@@ -29,6 +29,15 @@ class Sourcemeter2400(object):
         self._dev.write(':source:current:level {0}'.format(current))
         self._dev.write(":format:elements voltage, current")
 
+    def init_beeper(self):
+        self._dev.write(":system:beeper:stat 1")
+
+    def beep(self, frequency:float, duration:float):
+        frequency = min([2e6, max([65, frequency]))
+        duration = min([7.9, max([0, duration])])
+        
+        self._dev.write(f":system:beeper:immediate {frequency},{duration}")
+
     def arm(self):
         self._dev.write(':output:state 1')
 
