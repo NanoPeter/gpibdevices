@@ -64,7 +64,7 @@ class IPS120_10:
         self._query(command)
 
     def set_field_sweep_rate(self, tesla_per_minute: float):
-        assert (0 <= tesla_per_minute <= 0.3), 'rate is out of range'
+        assert (0 <= tesla_per_minute <= 0.5), 'rate is out of range'
         command = 'T{:.04f}'.format(tesla_per_minute)
         self._query(command)
 
