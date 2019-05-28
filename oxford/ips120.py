@@ -50,7 +50,7 @@ class IPS120_10:
         self._query(mode.value)
 
     def set_communication_protocol(self, protocol: CommunicationProtocol):
-        self._query(protocol.value)
+        self._write(protocol.value)
 
     def set_sweep_mode(self, mode: SweepMode):
         self._query(mode.value)
@@ -83,6 +83,22 @@ class IPS120_10:
 
     def get_field(self):
         return self._query('R7')
+
+    @property
+    def field(self):
+        field_bytes = self.get_field()
+
+        field_string = field_bytes.decode('utf-8')
+
+        if field_string[0] != 'R':
+            return float('nan')
+        else:
+            try:
+                return float(field_string[1:])
+            except:
+                return float('inf')
+
+        
 
 
 
