@@ -5,19 +5,15 @@
 __author__ = 'Marc Hanefeld, Alfons Schuck'
 __version__ = 0.1
 
-from typing import Tuple
-
 import visa
 
 
 class SR830m(object):
-    def __init__(self, GPIBPort: str = 'GPIB0::6::INSTR'):
+    def __init__(self, GPIBPort: str = 'GPIB0::7::INSTR'):
         rm = visa.ResourceManager('@py')
         self.inst = rm.open_resource(GPIBPort,
                                      write_termination='\r\n',
-                                     read_termination='\r\n',
-                                     delay=0.1
-                                     )
+                                     read_termination=None)
 
         # Defining the extremal values for the device
         self._vRmsAcMin = 0.004
@@ -43,19 +39,30 @@ class SR830m(object):
         self.set_sensitivity(1)  # Set the Sensitivity 1 V rms full scale.
         self.set_integration_time(1)  # Set (Query) the Time Constant to 1s.
         time.sleep(1)
-        
+
         """
 
     # TODO copy docstrings from user manual
 
     @property
     def phaseShift(self) -> float:
+        """
+        The PHAS command sets or queries the reference phase shift. The
+        parameter x is the phase (real number of degrees). The PHAS x com-
+        mand will set the phase shift to x. The value of x will be rounded to 0.01°.
+        The phase may be programmed from -360.00 ≤ x ≤ 729.99 and will be
+        wrapped around at ±180°. For example, the PHAS 541.0 command will
+        set the phase to -179.00° (541-360=181=-179). The PHAS? queries the
+        phase shift.
+        :return:
+        :rtype:
+        """
         return float(self.inst.query('PHAS?'))
 
     @phaseShift.setter
     def phaseShift(self, value: float):
         assert (value >= -360) and (value <= 729.99), 'Phase shift should be between -360° and +729.99°!'
-        self.inst.query('PHAS{:.2f}'.format(value))
+        self.inst.write('PHAS{:.2f}'.format(value))
 
     @property
     def fmod(self) -> int:
@@ -64,15 +71,29 @@ class SR830m(object):
     @fmod.setter
     def fmod(self, value: int):
         assert (value == 0) or (value == 1), 'FMOD should be 0 (external) or 1 (internal)!'
-        self.inst.query('FMOD{:d}'.format(value))
+        self.inst.write('FMOD{:d}'.format(value))
 
     @property
     def freq(self) -> float:
+        """
+        The FREQ command sets or queries the reference frequency. The
+        FREQ? query command will return the reference frequency (in internal or
+        external mode).
+        The FREQ f command sets the frequency of the internal oscillator. This
+        command is allowed only if the reference source is internal. The parame-
+        ter f is a frequency (real number of Hz). The value of f will be rounded to
+        5 digits or 0.0001 Hz, whichever is greater. The value of f is limited to
+        0.001 ≤ f ≤ 102000. If the harmonic number is greater than 1, then the
+        frequency is limited to nxf ≤ 102 kHz where n is the harmonic number.
+        :return: frequency
+        :rtype: float
+        """
         return float(self.inst.query('FREQ?'))
 
     @freq.setter
     def freq(self, value: float):
         assert (value >= 0.001) and (value <= 10200), 'Frequency should be between 0.001 Hz and 10200 Hz!'
+        self.inst.write('FREQ{:.3f}'.format(value))
 
     @property
     def rslp(self) -> int:
@@ -82,7 +103,7 @@ class SR830m(object):
     def rslp(self, value: int):
         assert (value >= 0) and (
                 value <= 2), 'Reference trigger should be 0 (zero crossing), 1 (rising edge) or 2 (falling edge)!'
-        self.inst.query('RSLP{:d}'.format(value))
+        self.inst.write('RSLP{:d}'.format(value))
 
     @property
     def harm(self) -> int:
@@ -91,7 +112,7 @@ class SR830m(object):
     @harm.setter
     def harm(self, value: int):
         assert (value >= 1) and (value <= 19999), 'Detection harmonic should be between 1 and 19999!'
-        self.inst.query('HARM{:d}'.format(value))
+        self.inst.write('HARM{:d}'.format(value))
 
     @property
     def slvl(self) -> float:
@@ -102,7 +123,7 @@ class SR830m(object):
         assert (value >= 0) and (value <= 5), 'Amplitude of sine-output should be between 0 (=0.004) V and 5 V'
         if value < 0.004:
             value = 0.004
-        self.inst.query('SLVL{.3f}'.format(value))
+        self.inst.write('SLVL{:.3f}'.format(value))
 
     @property
     def isrc(self) -> int:
@@ -111,6 +132,7 @@ class SR830m(object):
     @isrc.setter
     def isrc(self, value: int):
         assert (value >= 0) and (value <= 3), 'Input Configuration should be 0 (A), 1 (A-B), 2 (1 MΩ) or 3 (100 MΩ)!'
+        self.inst.write('ISRC{:d}'.format(value))
 
     @property
     def ignd(self) -> int:
@@ -119,7 +141,7 @@ class SR830m(object):
     @ignd.setter
     def ignd(self, value: int):
         assert (value == 0) or (value == 1), 'Shield grounding should be 0 (float) or 1 (ground)!'
-        self.inst.query('IGND{:d}'.format(value))
+        self.inst.write('IGND{:d}'.format(value))
 
     @property
     def icpl(self) -> int:
@@ -128,6 +150,7 @@ class SR830m(object):
     @icpl.setter
     def icpl(self, value: int):
         assert (value == 0) or (value == 1), 'Input coupling should be 0 (AC) or 1 (DC)!'
+        self.inst.write('ICPL{:d}'.format(value))
 
     @property
     def ilin(self) -> int:
@@ -137,7 +160,8 @@ class SR830m(object):
     def ilin(self, value: int):
         assert (value >= 0) and (
                 value <= 3), 'Input line notch filter should be 0 (no filter), 1 (Line filter), 2 (2x line filter) or 3 (both filters)!'
-        self.inst.query('ILIN{:d}'.format(value))
+        q = 'ILIN{:d}'.format(value)
+        self.inst.write('ILIN{:d}'.format(value))
 
     @property
     def sens(self) -> int:
@@ -146,7 +170,7 @@ class SR830m(object):
     @sens.setter
     def sens(self, value: int):
         assert (value >= 0) and (value <= 26), 'Sensitivity should be integer between 0 and 26! Check user manual.'
-        self.inst.query('SENS{:d}'.format(value))
+        self.inst.write('SENS{:d}'.format(value))
 
     @property
     def rmod(self) -> int:
@@ -155,7 +179,7 @@ class SR830m(object):
     @rmod.setter
     def rmod(self, value: int):
         assert (value >= 0) and (value <= 2), ' Reserve Mode should be 0 (High Reserve), 1 (Normal) or 2 (Low Noise)!'
-        self.inst.query('RMOD{:d}'.format(value))
+        self.inst.write('RMOD{:d}'.format(value))
 
     @property
     def oflt(self) -> int:
@@ -164,7 +188,7 @@ class SR830m(object):
     @oflt.setter
     def oflt(self, value: int):
         assert (value >= 0) and (value <= 19), 'Time Constant should be integer between 0 and 19! Check user manual.'
-        self.inst.query('OFLT{:d}'.format(value))
+        self.inst.write('OFLT{:d}'.format(value))
 
     @property
     def ofsl(self) -> int:
@@ -173,7 +197,7 @@ class SR830m(object):
     @ofsl.setter
     def ofsl(self, value: int):
         assert (value >= 0) and (value <= 3), 'Low pass filter slope should be 0 (6dB), 1 (12dB), 2 (18dB) or 3 (24dB)!'
-        self.inst.query('OFSL{:d}'.format(value))
+        self.inst.write('OFSL{:d}'.format(value))
 
     @property
     def sync(self) -> int:
@@ -182,7 +206,7 @@ class SR830m(object):
     @sync.setter
     def sync(self, value: int):
         assert (value == 0) or (value == 1), 'Synchronous filter should be 0 (Off) or 1 (filtering below 200Hz)!'
-        self.inst.query('SYNC{:d}'.format(value))
+        self.inst.write('SYNC{:d}'.format(value))
 
     # TODO DDEF
     # TODO FPOP
@@ -204,12 +228,12 @@ class SR830m(object):
                 4: self.inst.query('AUXV?4')}
 
     @auxv.setter
-    def auxv(self, value: Tuple[int, float]):
+    def auxv(self, value: tuple):
         auxChannel = value[0]
         auxVoltage = value[1]
         assert (auxChannel >= 1) and (auxChannel <= 4), 'Output Channel should be 1, 2, 3 or 4!'
         assert (abs(auxVoltage) <= 10.5), 'Output Voltage should be between -10.5V and 10.5V'
-        self.inst.query('AUXV{:d},{:.3f}'.format(auxChannel, auxVoltage))
+        self.inst.write('AUXV{:d},{:.3f}'.format(auxChannel, auxVoltage))
 
     # TODO OUTX
     # TODO OVRM
@@ -219,16 +243,16 @@ class SR830m(object):
     # TODO RSET
 
     def agan(self):
-        self.inst.query('AGAN')
+        self.inst.write('AGAN')
 
     def arsv(self):
-        self.inst.query('ARSV')
+        self.inst.write('ARSV')
 
     def aphs(self):
-        self.inst.query('APHS')
+        self.inst.write('APHS')
 
     def aoff(self, value: int):
-        self.inst.query('AOFF {:d}'.format(value))
+        self.inst.write('AOFF {:d}'.format(value))
 
     # TODO Datastorage Commands
 
@@ -248,7 +272,13 @@ class SR830m(object):
     def outpT(self) -> float:
         return float(self.inst.query('OUTP?4'))
 
-    # TODO SNAP
+    def snap(self, liste: list) -> list:
+        assert (len(liste) >= 2) and (len(liste) <= 6), 'List should contain 2-6 entries.'
+        assert (min(liste) >= 1) and (max(liste) <= 11), 'List should contain integer values between 1 and 11.'
+        query = 'SNAP?{},'.format(str(liste).strip('[]'))
+        answer = str(self.inst.query(query))
+        return [float(i) for i in answer.split(',')]
+
     # TODO SPTS
     # TODO TRCA
     # TODO TRCB
@@ -264,7 +294,7 @@ class SR830m(object):
         """
         Reset Lock-In
         """
-        self.inst.query('*RST')
+        self.inst.write('*RST')
 
     # TODO LOCL
     # TODO TRIG
@@ -281,4 +311,7 @@ class SR830m(object):
 
 
 if __name__ == '__main__':
-    pass
+    lia = SR830m()
+    a = lia.ilin
+    lia.ilin = 0
+    print(a)
